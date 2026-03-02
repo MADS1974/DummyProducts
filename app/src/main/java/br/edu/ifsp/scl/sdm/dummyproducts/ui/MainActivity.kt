@@ -43,7 +43,6 @@ class MainActivity : AppCompatActivity() {
         ProductImageAdapter(this, productImageList)
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(amb.root)
@@ -61,10 +60,17 @@ class MainActivity : AppCompatActivity() {
                     position: Int,
                     id: Long
                 ) {
+                    val product = productList[position]
+
+                    // --- EXERCÍCIO DE FIXAÇÃO: ATUALIZANDO A INTERFACE ---
+                    amb.productPriceTv.text = "Preço: $${product.price}"
+                    amb.productDescriptionTv.text = product.description
+                    // -----------------------------------------------------
+
                     val size = productImageList.size
                     productImageList.clear()
                     productImageAdapter.notifyItemRangeRemoved(0, size)
-                    retrieveProductImages(productList[position])
+                    retrieveProductImages(product)
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -82,8 +88,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun retrieveProducts() =
-        DummyJSONAPI.ProductListRequest({ productList ->
-            productList.products.also {
+        DummyJSONAPI.ProductListRequest({ productListResponse ->
+            productListResponse.products.also {
                 productAdapter.addAll(it)
             }
         }, {
@@ -91,7 +97,6 @@ class MainActivity : AppCompatActivity() {
         }).also {
             DummyJSONAPI.getInstance(this).addToRequestQueue(it)
         }
-
 
     private fun retrieveProductImages(product: Product) =
         product.images.forEach { imageUrl ->
@@ -105,9 +110,10 @@ class MainActivity : AppCompatActivity() {
                 ImageView.ScaleType.CENTER,
                 Bitmap.Config.ARGB_8888,
                 {
-                Toast.makeText(this, getString(R.string.request_problem), Toast.LENGTH_SHORT).show()
-        }).also {
-             DummyJSONAPI.getInstance(this).addToRequestQueue(it)
+                    Toast.makeText(this, getString(R.string.request_problem), Toast.LENGTH_SHORT).show()
+                }
+            ).also {
+                DummyJSONAPI.getInstance(this).addToRequestQueue(it)
+            }
         }
-    }
 }
